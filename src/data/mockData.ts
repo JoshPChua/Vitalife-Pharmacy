@@ -4,6 +4,15 @@ export function generateId(): string {
   return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
 }
 
+// Dynamic date helpers — mock "today" sales always match current PHT date
+function phtToday(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
+}
+function todayTime(h: number, m: number): string {
+  const d = phtToday();
+  return `${d}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00+08:00`;
+}
+
 export const branches: Branch[] = [
   { id: 'branch-munoz', name: 'Muñoz - Main Branch', address: 'Muñoz, Nueva Ecija', phone: '(044) 456-1234', type: 'sales' },
   { id: 'branch-pagataan', name: 'Pagataan - Warehouse / Office', address: 'Pagataan, Muñoz, Nueva Ecija', phone: '(044) 456-5678', type: 'warehouse' },
@@ -169,13 +178,13 @@ export const sales: Sale[] = [
     items: [mkItem('si-15','prod-11','lot-30','LOT-2025-030','2027-09-25',5,220,'reserved',1,'M-B2-02'), mkItem('si-16','prod-12','lot-33','LOT-2025-033','2028-04-20',3,350,'reserved',1,'M-B2-03')]},
   { id: 'sale-8', saleNumber: 'SL-2026-0008', branchId: 'branch-munoz', dateTime: '2026-05-20T16:00:00+08:00', status: 'confirmed', orderType: 'walk_in', paymentMethod: 'cash', paymentStatus: 'paid', deliveryStatus: 'for_pickup', totalAmount: 2385, discount: 0, subtotal: 2385, amountPaid: 2400, change: 15, balance: 0, isCOD: false, createdBy: 'user-3',
     items: [mkItem('si-18','prod-1','lot-2','LOT-2025-002','2026-08-10',3,285,'reserved',1,'M-A1-02'), mkItem('si-19','prod-7','lot-21','LOT-2025-021','2026-08-05',3,350,'reserved',1,'M-B1-01'), mkItem('si-20','prod-18','lot-47','LOT-2025-047','2027-08-09',4,120,'reserved',1,'M-C2-03')]},
-  { id: 'sale-9', saleNumber: 'SL-2026-0009', branchId: 'branch-munoz', dateTime: '2026-05-23T08:30:00+08:00', status: 'confirmed', orderType: 'bulk_order', paymentMethod: 'credit_card', paymentStatus: 'paid', deliveryStatus: 'for_pickup', totalAmount: 2560, discount: 0, subtotal: 2560, amountPaid: 2560, change: 0, balance: 0, isCOD: false, referenceNumber: 'VISA-9988', createdBy: 'user-3', customerName: 'Mrs. Santos',
+  { id: 'sale-9', saleNumber: 'SL-2026-0009', branchId: 'branch-munoz', dateTime: todayTime(8,30), status: 'confirmed', orderType: 'bulk_order', paymentMethod: 'credit_card', paymentStatus: 'paid', deliveryStatus: 'for_pickup', totalAmount: 2560, discount: 0, subtotal: 2560, amountPaid: 2560, change: 0, balance: 0, isCOD: false, referenceNumber: 'VISA-9988', createdBy: 'user-3', customerName: 'Mrs. Santos',
     items: [mkItem('si-21','prod-5','lot-15','LOT-2025-015','2027-08-14',8,120,'reserved',1,'M-A2-02'), mkItem('si-22','prod-25','lot-64','LOT-2025-064','2028-06-15',5,320,'reserved',1,'M-D3-01')]},
-  { id: 'sale-10', saleNumber: 'SL-2026-0010', branchId: 'branch-munoz', dateTime: '2026-05-23T10:00:00+08:00', status: 'partially_released', orderType: 'walk_in', paymentMethod: 'cash', paymentStatus: 'paid', deliveryStatus: 'for_pickup', totalAmount: 3075, discount: 0, subtotal: 3075, amountPaid: 3100, change: 25, balance: 0, isCOD: false, createdBy: 'user-3', preparedBy: 'John Reyes', checkedBy: 'Anna Lim',
-    items: [mkItem('si-24','prod-4','lot-12','LOT-2025-012','2027-05-10',15,85,'released',1,'M-A2-01','2026-05-23T10:30:00+08:00'), mkItem('si-25','prod-9','lot-25','LOT-2025-025','2028-05-30',4,450,'reserved',1,'M-B1-03')]},
-  { id: 'sale-11', saleNumber: 'SL-2026-0011', branchId: 'branch-munoz', dateTime: '2026-05-23T11:00:00+08:00', status: 'confirmed', orderType: 'bulk_order', paymentMethod: 'online_banking', paymentStatus: 'paid', deliveryStatus: 'for_pickup', totalAmount: 5600, discount: 0, subtotal: 5600, amountPaid: 5600, change: 0, balance: 0, isCOD: false, referenceNumber: 'BPI-20260523', createdBy: 'user-3', customerName: 'Hospital PO',
+  { id: 'sale-10', saleNumber: 'SL-2026-0010', branchId: 'branch-munoz', dateTime: todayTime(10,0), status: 'partially_released', orderType: 'walk_in', paymentMethod: 'cash', paymentStatus: 'paid', deliveryStatus: 'for_pickup', totalAmount: 3075, discount: 0, subtotal: 3075, amountPaid: 3100, change: 25, balance: 0, isCOD: false, createdBy: 'user-3', preparedBy: 'John Reyes', checkedBy: 'Anna Lim',
+    items: [mkItem('si-24','prod-4','lot-12','LOT-2025-012','2027-05-10',15,85,'released',1,'M-A2-01',todayTime(10,30)), mkItem('si-25','prod-9','lot-25','LOT-2025-025','2028-05-30',4,450,'reserved',1,'M-B1-03')]},
+  { id: 'sale-11', saleNumber: 'SL-2026-0011', branchId: 'branch-munoz', dateTime: todayTime(11,0), status: 'confirmed', orderType: 'bulk_order', paymentMethod: 'online_banking', paymentStatus: 'paid', deliveryStatus: 'for_pickup', totalAmount: 5600, discount: 0, subtotal: 5600, amountPaid: 5600, change: 0, balance: 0, isCOD: false, referenceNumber: 'BPI-20260523', createdBy: 'user-3', customerName: 'Hospital PO',
     items: [mkItem('si-26','prod-21','lot-55','LOT-2025-055','2026-07-10',2,2800,'reserved',1,'M-D1-03')]},
-  { id: 'sale-12', saleNumber: 'SL-2026-0012', branchId: 'branch-munoz', dateTime: '2026-05-23T14:00:00+08:00', status: 'confirmed', orderType: 'cod', paymentMethod: 'cod', paymentStatus: 'unpaid', deliveryStatus: 'for_delivery', totalAmount: 1840, discount: 0, subtotal: 1840, amountPaid: 0, change: 0, balance: 1840, isCOD: true, createdBy: 'user-4', customerName: 'Dr. Reyes Clinic', customerAddress: 'Science City of Muñoz',
+  { id: 'sale-12', saleNumber: 'SL-2026-0012', branchId: 'branch-munoz', dateTime: todayTime(14,0), status: 'confirmed', orderType: 'cod', paymentMethod: 'cod', paymentStatus: 'unpaid', deliveryStatus: 'for_delivery', totalAmount: 1840, discount: 0, subtotal: 1840, amountPaid: 0, change: 0, balance: 1840, isCOD: true, createdBy: 'user-4', customerName: 'Dr. Reyes Clinic', customerAddress: 'Science City of Muñoz',
     items: [mkItem('si-27','prod-11','lot-30','LOT-2025-030','2027-09-25',4,220,'reserved',1,'M-B2-02'), mkItem('si-28','prod-19','lot-49','LOT-2025-049','2028-01-18',6,160,'reserved',1,'M-D1-01')]},
 ];
 
@@ -198,7 +207,7 @@ export const stockTransfers: StockTransfer[] = [
     items: [
       { id: 'ti-6', productId: 'prod-10', lotId: 'lot-71', lotNumber: 'LOT-2026-005', expiryDate: '2028-10-30', quantity: 8 },
     ]},
-  { id: 'transfer-5', transferNumber: 'TR-2026-005', fromBranchId: 'branch-pagataan', toBranchId: 'branch-munoz', status: 'draft', dateTime: '2026-05-23T07:00:00+08:00', createdBy: 'user-2',
+  { id: 'transfer-5', transferNumber: 'TR-2026-005', fromBranchId: 'branch-pagataan', toBranchId: 'branch-munoz', status: 'draft', dateTime: todayTime(7,0), createdBy: 'user-2',
     items: [
       { id: 'ti-7', productId: 'prod-21', lotId: 'lot-56', lotNumber: 'LOT-2025-056', expiryDate: '2028-08-20', quantity: 3 },
       { id: 'ti-8', productId: 'prod-23', lotId: 'lot-61', lotNumber: 'LOT-2025-061', expiryDate: '2027-08-18', quantity: 10 },
@@ -215,9 +224,9 @@ export const stockMovements: StockMovement[] = [
   { id: 'mov-7',  type: 'sale_reserved',     productId: 'prod-16', lotId: 'lot-43', branchId: 'branch-munoz',    quantity: 8,    dateTime: '2026-05-10T09:00:00+08:00', createdBy: 'user-3', referenceId: 'sale-5', referenceNumber: 'SL-2026-0005', notes: 'Sale reserved — FEFO' },
   { id: 'mov-8',  type: 'sale_released',     productId: 'prod-4',  lotId: 'lot-11', branchId: 'branch-munoz',    quantity: 10,   dateTime: '2026-05-01T10:00:00+08:00', createdBy: 'user-3', referenceId: 'sale-1', referenceNumber: 'SL-2026-0001', notes: 'Released — Prepared: John Reyes, Checked: Anna Lim' },
   { id: 'mov-9',  type: 'sale_released',     productId: 'prod-1',  lotId: 'lot-2',  branchId: 'branch-munoz',    quantity: 5,    dateTime: '2026-05-03T12:00:00+08:00', createdBy: 'user-3', referenceId: 'sale-2', referenceNumber: 'SL-2026-0002', notes: 'Released' },
-  { id: 'mov-10', type: 'sale_reserved',     productId: 'prod-5',  lotId: 'lot-15', branchId: 'branch-munoz',    quantity: 8,    dateTime: '2026-05-23T08:30:00+08:00', createdBy: 'user-3', referenceId: 'sale-9', referenceNumber: 'SL-2026-0009', notes: 'Bulk order reserved' },
-  { id: 'mov-11', type: 'sale_released',     productId: 'prod-4',  lotId: 'lot-12', branchId: 'branch-munoz',    quantity: 15,   dateTime: '2026-05-23T10:30:00+08:00', createdBy: 'user-3', referenceId: 'sale-10', referenceNumber: 'SL-2026-0010', notes: 'Released' },
-  { id: 'mov-12', type: 'sale_reserved',     productId: 'prod-21', lotId: 'lot-55', branchId: 'branch-munoz',    quantity: 2,    dateTime: '2026-05-23T11:00:00+08:00', createdBy: 'user-3', referenceId: 'sale-11', referenceNumber: 'SL-2026-0011', notes: 'Hospital PO reserved' },
+  { id: 'mov-10', type: 'sale_reserved',     productId: 'prod-5',  lotId: 'lot-15', branchId: 'branch-munoz',    quantity: 8,    dateTime: todayTime(8,30), createdBy: 'user-3', referenceId: 'sale-9', referenceNumber: 'SL-2026-0009', notes: 'Bulk order reserved' },
+  { id: 'mov-11', type: 'sale_released',     productId: 'prod-4',  lotId: 'lot-12', branchId: 'branch-munoz',    quantity: 15,   dateTime: todayTime(10,30), createdBy: 'user-3', referenceId: 'sale-10', referenceNumber: 'SL-2026-0010', notes: 'Released' },
+  { id: 'mov-12', type: 'sale_reserved',     productId: 'prod-21', lotId: 'lot-55', branchId: 'branch-munoz',    quantity: 2,    dateTime: todayTime(11,0), createdBy: 'user-3', referenceId: 'sale-11', referenceNumber: 'SL-2026-0011', notes: 'Hospital PO reserved' },
   { id: 'mov-13', type: 'transfer_out',      productId: 'prod-1',  lotId: 'lot-4',  branchId: 'branch-pagataan', quantity: 5,    dateTime: '2026-05-20T08:00:00+08:00', createdBy: 'user-2', referenceId: 'transfer-3', referenceNumber: 'TR-2026-003', notes: 'In transit to Muñoz' },
   { id: 'mov-14', type: 'adjustment_out',    productId: 'prod-6',  lotId: 'lot-78', branchId: 'branch-munoz',    quantity: -2,   dateTime: '2026-05-15T14:00:00+08:00', createdBy: 'user-3', notes: 'Expired stock removed' },
   { id: 'mov-15', type: 'adjustment_out',    productId: 'prod-25', lotId: 'lot-65', branchId: 'branch-munoz',    quantity: -3,   dateTime: '2026-05-10T11:00:00+08:00', createdBy: 'user-3', notes: 'Water damage write-off' },

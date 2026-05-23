@@ -5,7 +5,7 @@ import { PageHeader } from '../components/shared/SharedComponents';
 import { Modal } from '../components/shared/Modal';
 import { getAvailable } from '../types';
 import { differenceInDays } from 'date-fns';
-import { Search, Eye, Edit, X } from 'lucide-react';
+import { Search, Eye, Edit, X, Plus } from 'lucide-react';
 
 export const Inventory: React.FC = () => {
   const store = useStore();
@@ -18,6 +18,14 @@ export const Inventory: React.FC = () => {
   const [adjLot, setAdjLot] = useState<typeof store.lots[0] | null>(null);
   const [adjAmt, setAdjAmt] = useState(0);
   const [adjReason, setAdjReason] = useState('Physical count correction');
+  const [showReceive, setShowReceive] = useState(false);
+  const [rcvProduct, setRcvProduct] = useState('');
+  const [rcvBranch, setRcvBranch] = useState(store.getPagataanBranchId());
+  const [rcvLot, setRcvLot] = useState('');
+  const [rcvExpiry, setRcvExpiry] = useState('');
+  const [rcvQty, setRcvQty] = useState(0);
+  const [rcvShelf, setRcvShelf] = useState('');
+  const [rcvSupplier, setRcvSupplier] = useState('');
   const now = new Date();
   const PER = 25;
 
@@ -58,10 +66,16 @@ export const Inventory: React.FC = () => {
   const doAdjust = () => {
     if (adjLot && adjAmt !== 0) { store.adjustStock(adjLot.id, adjAmt, adjReason); setAdjLot(null); setAdjAmt(0); }
   };
+  const doReceive = () => {
+    if (rcvProduct && rcvLot && rcvExpiry && rcvQty > 0) {
+      store.receiveStock(rcvProduct, rcvBranch, rcvLot, rcvExpiry, rcvQty, rcvShelf, rcvSupplier || undefined);
+      setShowReceive(false); setRcvProduct(''); setRcvLot(''); setRcvExpiry(''); setRcvQty(0); setRcvShelf(''); setRcvSupplier('');
+    } else { store.addToast('Fill all required fields', 'error'); }
+  };
 
   return (
     <div>
-      <PageHeader title="Inventory" subtitle={`${filtered.length} lots across ${store.branches.length} locations`} />
+      <PageHeader title="Inventory" subtitle={`${filtered.length} lots across ${store.branches.length} locations`} actions={<button className="btn btn-primary btn-sm" onClick={() => setShowReceive(true)}><Plus size={14} /> Receive Stock</button>} />
       <div className="vl-card mb-4">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[180px]"><Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><input className="vl-input !pl-8" placeholder="Product, SKU, lot #..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} /></div>
@@ -115,6 +129,24 @@ export const Inventory: React.FC = () => {
           <div><label className="text-[11px] font-medium text-slate-500">Adjustment (+/-)</label><input type="number" className="vl-input" value={adjAmt} onChange={(e) => setAdjAmt(parseInt(e.target.value) || 0)} /></div>
           <div><label className="text-[11px] font-medium text-slate-500">Reason</label><select className="vl-input" value={adjReason} onChange={(e) => setAdjReason(e.target.value)}><option>Physical count correction</option><option>Damaged goods</option><option>Expired removal</option><option>Received delivery</option><option>Other</option></select></div>
           <button className="btn btn-primary w-full" disabled={adjAmt === 0} onClick={doAdjust}>Confirm Adjustment</button>
+        </div>
+      </Modal>}
+      {showReceive && <Modal isOpen={showReceive} title="Receive New Stock" onClose={() => setShowReceive(false)} width="500px">
+        <div className="space-y-3 text-[13px]">
+          <div><label className="text-[11px] font-medium text-slate-500">Product *</label>
+            <select className="vl-input" value={rcvProduct} onChange={(e) => setRcvProduct(e.target.value)}><option value="">Select product...</option>{store.products.map((p) => <option key={p.id} value={p.id}>{p.sku} — {p.name} ({p.unit})</option>)}</select></div>
+          <div><label className="text-[11px] font-medium text-slate-500">Receiving Branch *</label>
+            <select className="vl-input" value={rcvBranch} onChange={(e) => setRcvBranch(e.target.value)}>{store.branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><label className="text-[11px] font-medium text-slate-500">Lot Number *</label><input className="vl-input" value={rcvLot} onChange={(e) => setRcvLot(e.target.value)} placeholder="e.g. LOT-2026-100" /></div>
+            <div><label className="text-[11px] font-medium text-slate-500">Expiry Date *</label><input type="date" className="vl-input" value={rcvExpiry} onChange={(e) => setRcvExpiry(e.target.value)} /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><label className="text-[11px] font-medium text-slate-500">Quantity *</label><input type="number" className="vl-input" value={rcvQty || ''} onChange={(e) => setRcvQty(parseInt(e.target.value) || 0)} min={1} /></div>
+            <div><label className="text-[11px] font-medium text-slate-500">Shelf Location</label><input className="vl-input" value={rcvShelf} onChange={(e) => setRcvShelf(e.target.value)} placeholder="e.g. W-A1-05" /></div>
+          </div>
+          <div><label className="text-[11px] font-medium text-slate-500">Supplier / Source</label><input className="vl-input" value={rcvSupplier} onChange={(e) => setRcvSupplier(e.target.value)} placeholder="e.g. PharmaCorp Manila" /></div>
+          <button className="btn btn-primary w-full" onClick={doReceive}>Receive Stock</button>
         </div>
       </Modal>}
     </div>

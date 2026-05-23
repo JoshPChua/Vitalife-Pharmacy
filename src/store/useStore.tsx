@@ -30,6 +30,7 @@ interface StoreContextType {
   createTransfer: (transfer: Omit<StockTransfer, 'id' | 'transferNumber'>) => StockTransfer;
   updateTransferStatus: (transferId: string, status: TransferStatus) => void;
   adjustStock: (lotId: string, adjustment: number, reason: string) => void;
+  receiveStock: (productId: string, branchId: string, lotNumber: string, expiryDate: string, quantity: number, shelfLocation: string, supplier?: string) => void;
   getProductById: (id: string) => Product | undefined;
   getLotsByProduct: (productId: string, branchId?: string) => Lot[];
   getCategoryById: (id: string) => Category | undefined;
@@ -169,6 +170,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addToast(`Stock adjusted by ${adjustment > 0 ? '+' : ''}${adjustment}`, 'success');
   };
 
+  const receiveStock = (productId: string, branchId: string, lotNumber: string, expiryDate: string, quantity: number, shelfLocation: string, supplier?: string) => {
+    const lotId = generateId();
+    const newLot: Lot = { id: lotId, productId, lotNumber, expiryDate, branchId, onHand: quantity, reserved: 0, damaged: 0, inTransit: 0, shelfLocation };
+    setLots((p) => [...p, newLot]);
+    setStockMovements((p) => [...p, { id: generateId(), lotId, productId, branchId, type: 'purchase_received', quantity, dateTime: nowPHT(), createdBy: currentUser.id, notes: supplier ? `Received from ${supplier}` : 'New stock received' }]);
+    addToast(`Received ${quantity} units — Lot ${lotNumber}`, 'success');
+  };
+
   const getProductById = (id: string) => products.find((p) => p.id === id);
   const getLotsByProduct = (productId: string, branchId?: string) => lots.filter((l) => l.productId === productId && (!branchId || l.branchId === branchId));
   const getCategoryById = (id: string) => categories.find((c) => c.id === id);
@@ -215,8 +224,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const getTodaysSales = (branchId?: string) => {
-    const today = new Date().toISOString().split('T')[0];
-    return sales.filter((s) => s.dateTime.split('T')[0] === today && (!branchId || s.branchId === branchId) && s.status !== 'cancelled' && s.status !== 'draft');
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD in PHT
+    return sales.filter((s) => {
+      const saleDate = new Date(s.dateTime).toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+      return saleDate === today && (!branchId || s.branchId === branchId) && s.status !== 'cancelled' && s.status !== 'draft';
+    });
   };
 
   const getDailySalesTotal = (branchId?: string) => getTodaysSales(branchId).reduce((t, s) => t + s.totalAmount, 0);
@@ -226,7 +238,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     currentUser, selectedBranchId, toasts, isOnline, offlineQueueCount, lastSyncedAt,
     setSelectedBranch, addToast, removeToast, toggleOnline, createSale,
     markItemReleased, markAllReleased, cancelSaleItem, markSalePrepared,
-    createTransfer, updateTransferStatus, adjustStock,
+    createTransfer, updateTransferStatus, adjustStock, receiveStock,
     getProductById, getLotsByProduct, getCategoryById, getBranchById, getUserById,
     getSoldNotReleasedItems, getLowStockLots, getExpiringLots, getTodaysSales, getDailySalesTotal,
     getFEFOLots, getMunozBranchId, getPagataanBranchId,

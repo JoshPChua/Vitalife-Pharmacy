@@ -16,11 +16,13 @@ export const Layout: React.FC = () => {
   const { toasts, removeToast } = useStore();
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 ml-[220px] flex flex-col min-h-screen transition-all duration-200">
+    <div className="min-h-screen">
+      <div className="fixed left-0 top-0 z-30">
+        <Sidebar />
+      </div>
+      <div className="ml-[220px] flex flex-col min-h-screen">
         <Topbar />
-        <main className="flex-1 p-5 overflow-auto">
+        <main className="flex-1 p-4 overflow-auto bg-body">
           <Outlet />
         </main>
       </div>
